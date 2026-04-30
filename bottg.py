@@ -25,7 +25,7 @@ def keep_alive():
     t.start()
 
 # --- 2. НАСТРОЙКИ БОТА ---
-API_TOKEN = 'ВСТАВЬ_ТОКЕН_ТУТ'
+API_TOKEN = '8752127884:AAEimy5lp4dhKURaioEK-TjQsGTnGzH9CQQ'
 ADMIN_ID = 8314455447  # ВСТАВЬ_СВОЙ_ID_ТУТ (цифрами)
 SBP_NUMBER = "+7920157****" # Твой номер
 PRICE = "99"
