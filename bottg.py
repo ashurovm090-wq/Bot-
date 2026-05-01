@@ -1,4 +1,4 @@
-import sqlite3 # Исправил заглавную букву
+import sqlite3
 import asyncio
 import os
 from threading import Thread
@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-# --- СЕРВЕР ДЛЯ RENDER ---
+# --- 1. СЕРВЕР ДЛЯ RENDER (ЧТОБЫ БОТ НЕ СПАЛ) ---
 app = Flask('')
 @app.route('/')
 def home(): return "MagaVPN Status: Online 🚀"
@@ -21,16 +21,16 @@ def keep_alive():
     t.daemon = True
     t.start()
 
-# --- НАСТРОЙКИ ---
+# --- 2. НАСТРОЙКИ ---
 API_TOKEN = '8752127884:AAEimy5lp4dhKURaioEK-TjQsGTnGzH9CQQ'
 ADMIN_ID = 8314455447
-CARD_NUMBER = "2202 2061 8149 6147" # Номер карты (с пробелами для удобства)
+CARD_NUMBER = "2202 2061 8149 6147"
 PRICE = "99"
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
-# ГЕНЕРАТОР КЛЮЧА
+# --- 3. ГЕНЕРАТОР КЛЮЧА ---
 def generate_vless(user_id):
     uuid = "e9eed10d-d0af-49c9-8a2a-4a6f48da4a4b"
     ip = "84.201.181.168"
@@ -38,10 +38,9 @@ def generate_vless(user_id):
     pbk = "MHJsIaEsQByNBl7ebZIUVJNLlkxObT8_UZpxjhlb8GA"
     sni = "yandex.com"
     flow = "xtls-rprx-vision"
-    # Чистая ссылка без лишних кавычек
     return f"vless://{uuid}@{ip}:{port}?security=reality&encryption=none&sni={sni}&fp=chrome&type=tcp&pbk={pbk}&flow={flow}#MagaVPN_{user_id}"
 
-# БАЗА ДАННЫХ
+# --- 4. БАЗА ДАННЫХ ---
 def init_db():
     conn = sqlite3.connect('maga_vpn.db')
     cursor = conn.cursor()
@@ -51,7 +50,8 @@ def init_db():
 
 init_db()
 
-# КОМАНДА /START
+# --- 5. ЛОГИКА КЛИЕНТА ---
+
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     builder = InlineKeyboardBuilder()
@@ -67,13 +67,10 @@ async def cmd_start(message: types.Message):
         "🛡 Протокол Reality (не блокируется)\n"
         "🌍 Сервер: Нидерланды"
     )
-    
     await message.answer(welcome_text, reply_markup=builder.as_markup(), parse_mode="Markdown")
 
-# ПОКУПКА
 @dp.callback_query(F.data == "buy")
 async def buy(callback: types.CallbackQuery):
-    # Исправил MarkdownV2 на Markdown, чтобы не было ошибки из-за пробелов в номере карты
     pay_text = (
         "💳 **ОПЛАТА ПО КАРТЕ / СБП**\n\n"
         f"Сумма: **{PRICE}₽**\n"
@@ -84,7 +81,6 @@ async def buy(callback: types.CallbackQuery):
     await callback.message.answer(pay_text, parse_mode="Markdown")
     await callback.answer()
 
-# ИНСТРУКЦИЯ
 @dp.callback_query(F.data == "help")
 async def help_info(callback: types.CallbackQuery):
     help_text = (
@@ -100,14 +96,14 @@ async def help_info(callback: types.CallbackQuery):
     await callback.message.answer(help_text, parse_mode="Markdown", disable_web_page_preview=True)
     await callback.answer()
 
-# ПРОБНЫЙ ПЕРИОД
 @dp.callback_query(F.data == "trial")
 async def trial(callback: types.CallbackQuery):
     key = generate_vless(callback.from_user.id)
     await callback.message.answer(f"Твой пробный ключ (нажми, чтобы скопировать):\n\n`{key}`", parse_mode="Markdown")
     await callback.answer()
 
-# ОБРАБОТКА ФОТО (ЧЕКА)
+# --- 6. АДМИН-ПАНЕЛЬ ---
+
 @dp.message(F.photo)
 async def handle_pay(message: types.Message):
     builder = InlineKeyboardBuilder()
@@ -119,7 +115,6 @@ async def handle_pay(message: types.Message):
                          reply_markup=builder.as_markup())
     await message.answer("📥 Чек отправлен админу. Ожидай подтверждения!")
 
-# ОДОБРЕНИЕ АДМИНОМ
 @dp.callback_query(F.data.startswith("ok_"))
 async def ok(callback: types.CallbackQuery):
     uid = callback.data.split("_")[1]
@@ -128,6 +123,14 @@ async def ok(callback: types.CallbackQuery):
     await callback.message.edit_caption(caption="✅ Одобрено")
     await callback.answer()
 
+@dp.callback_query(F.data.startswith("no_"))
+async def no(callback: types.CallbackQuery):
+    uid = callback.data.split("_")[1]
+    await bot.send_message(uid, "❌ Твой чек был отклонен. Если это ошибка, напиши в поддержку.")
+    await callback.message.edit_caption(caption="🔴 Отклонено")
+    await callback.answer()
+
+# --- 7. ЗАПУСК ---
 async def main():
     keep_alive()
     await dp.start_polling(bot)
