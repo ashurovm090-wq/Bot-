@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3 # Исправил заглавную букву
 import asyncio
 import os
 from threading import Thread
@@ -73,6 +73,7 @@ async def cmd_start(message: types.Message):
 # ПОКУПКА
 @dp.callback_query(F.data == "buy")
 async def buy(callback: types.CallbackQuery):
+    # Исправил MarkdownV2 на Markdown, чтобы не было ошибки из-за пробелов в номере карты
     pay_text = (
         "💳 **ОПЛАТА ПО КАРТЕ / СБП**\n\n"
         f"Сумма: **{PRICE}₽**\n"
@@ -80,7 +81,7 @@ async def buy(callback: types.CallbackQuery):
         "После перевода **пришли скриншот чека** в этот чат. "
         "Админ проверит его и выдаст тебе доступ!"
     )
-    await callback.message.answer(pay_text, parse_mode="MarkdownV2")
+    await callback.message.answer(pay_text, parse_mode="Markdown")
     await callback.answer()
 
 # ИНСТРУКЦИЯ
