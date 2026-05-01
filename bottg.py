@@ -22,7 +22,7 @@ def keep_alive():
     t.start()
 
 # --- 2. НАСТРОЙКИ (ЗАМЕНИ НА СВОИ) ---
-API_TOKEN = 'ТВОЙ_ТОКЕН_ОТ_BOTFATHER'
+API_TOKEN = '8752127884:AAEimy5lp4dhKURaioEK-TjQsGTnGzH9CQQ'
 ADMIN_ID = 8314455447 # Твой ID из @getmyid_bot
 SBP_NUMBER = 2202206181496147 
 PRICE = "99"
