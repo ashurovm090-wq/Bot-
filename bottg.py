@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-# --- 1. МИКРО-СЕРВЕР ДЛЯ RENDER ---
+# --- СЕРВЕР ДЛЯ RENDER ---
 app = Flask('')
 @app.route('/')
 def home(): return "MagaVPN Status: Online 🚀"
@@ -21,30 +21,27 @@ def keep_alive():
     t.daemon = True
     t.start()
 
-# --- 2. НАСТРОЙКИ (ЗАМЕНИ НА СВОИ) ---
+# --- НАСТРОЙКИ ---
 API_TOKEN = '8752127884:AAEimy5lp4dhKURaioEK-TjQsGTnGzH9CQQ'
-ADMIN_ID = 8314455447 # Твой ID из @getmyid_bot
-SBP_NUMBER = 2202206181496147 
+ADMIN_ID = 8314455447
+CARD_NUMBER = "2202 2061 8149 6147" # Номер карты (с пробелами для удобства)
 PRICE = "99"
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
-# --- 3. ГЕНЕРАТОР РЕАЛЬНОГО КЛЮЧА ---
+# ГЕНЕРАТОР КЛЮЧА
 def generate_vless(user_id):
-    # Данные из твоего JSON
     uuid = "e9eed10d-d0af-49c9-8a2a-4a6f48da4a4b"
     ip = "84.201.181.168"
     port = "8443"
     pbk = "MHJsIaEsQByNBl7ebZIUVJNLlkxObT8_UZpxjhlb8GA"
     sni = "yandex.com"
     flow = "xtls-rprx-vision"
-    
-    # Собираем готовую ссылку формата VLESS
-    link = f"vless://{uuid}@{ip}:{port}?security=reality&encryption=none&sni={sni}&fp=chrome&type=tcp&pbk={pbk}&flow={flow}#MagaVPN_{user_id}"
-    return link
+    # Чистая ссылка без лишних кавычек
+    return f"vless://{uuid}@{ip}:{port}?security=reality&encryption=none&sni={sni}&fp=chrome&type=tcp&pbk={pbk}&flow={flow}#MagaVPN_{user_id}"
 
-# --- 4. ЛОГИКА БОТА ---
+# БАЗА ДАННЫХ
 def init_db():
     conn = sqlite3.connect('maga_vpn.db')
     cursor = conn.cursor()
@@ -54,43 +51,79 @@ def init_db():
 
 init_db()
 
+# КОМАНДА /START
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    conn = sqlite3.connect('maga_vpn.db')
-    cursor = conn.cursor()
-    cursor.execute("INSERT OR IGNORE INTO users VALUES (?, ?)", (message.from_user.id, message.from_user.username))
-    conn.commit()
-    conn.close()
-
     builder = InlineKeyboardBuilder()
-    builder.row(types.InlineKeyboardButton(text="💎 Купить подписку", callback_data="buy"))
+    builder.row(types.InlineKeyboardButton(text="💎 Купить подписку (99₽)", callback_data="buy"))
     builder.row(types.InlineKeyboardButton(text="🎁 Пробный период", callback_data="trial"))
+    builder.row(types.InlineKeyboardButton(text="📖 Как подключить?", callback_data="help"))
     
-    await message.answer(f"Салам, {message.from_user.first_name}! 🚀\nТвой личный MagaVPN.", reply_markup=builder.as_markup())
+    welcome_text = (
+        f"Салам, {message.from_user.first_name}! 🚀\n\n"
+        "Добро пожаловать в **MagaVPN**.\n"
+        "Мы обеспечиваем полную анонимность и доступ к любым ресурсам.\n\n"
+        "⚡️ Скорость до 1 Гбит/с\n"
+        "🛡 Протокол Reality (не блокируется)\n"
+        "🌍 Сервер: Нидерланды"
+    )
+    
+    await message.answer(welcome_text, reply_markup=builder.as_markup(), parse_mode="Markdown")
 
+# ПОКУПКА
 @dp.callback_query(F.data == "buy")
 async def buy(callback: types.CallbackQuery):
-    await callback.message.answer(f"Оплата `{PRICE}` руб. на номер: `{SBP_NUMBER}`\nПришли скрин чека сюда!")
+    pay_text = (
+        "💳 **ОПЛАТА ПО КАРТЕ / СБП**\n\n"
+        f"Сумма: **{PRICE}₽**\n"
+        f"Номер карты: `{CARD_NUMBER}`\n\n"
+        "После перевода **пришли скриншот чека** в этот чат. "
+        "Админ проверит его и выдаст тебе доступ!"
+    )
+    await callback.message.answer(pay_text, parse_mode="MarkdownV2")
     await callback.answer()
 
+# ИНСТРУКЦИЯ
+@dp.callback_query(F.data == "help")
+async def help_info(callback: types.CallbackQuery):
+    help_text = (
+        "📖 **ИНСТРУКЦИЯ ПО ПОДКЛЮЧЕНИЮ**\n\n"
+        "1️⃣ **Скачай приложение:**\n"
+        "— iOS: [V2Box](https://apps.apple.com/app/v2box-v2ray-client/id1640135277)\n"
+        "— Android: [v2rayNG](https://play.google.com/store/apps/details?id=com.v2ray.ang)\n"
+        "— PC: [Hiddify](https://github.com/hiddify/hiddify-next/releases)\n\n"
+        "2️⃣ **Скопируй ключ**, который выдаст бот.\n"
+        "3️⃣ В приложении нажми **(+)** или **Import from Clipboard**.\n"
+        "4️⃣ Нажми кнопку **Connect** (Подключиться)."
+    )
+    await callback.message.answer(help_text, parse_mode="Markdown", disable_web_page_preview=True)
+    await callback.answer()
+
+# ПРОБНЫЙ ПЕРИОД
 @dp.callback_query(F.data == "trial")
 async def trial(callback: types.CallbackQuery):
     key = generate_vless(callback.from_user.id)
-    await callback.message.answer(f"Твой пробный ключ:\n\n`{key}`")
+    await callback.message.answer(f"Твой пробный ключ (нажми, чтобы скопировать):\n\n`{key}`", parse_mode="Markdown")
     await callback.answer()
 
+# ОБРАБОТКА ФОТО (ЧЕКА)
 @dp.message(F.photo)
 async def handle_pay(message: types.Message):
     builder = InlineKeyboardBuilder()
-    builder.row(types.InlineKeyboardButton(text="✅ Выдать ключ", callback_data=f"ok_{message.from_user.id}"))
-    await bot.send_photo(ADMIN_ID, message.photo[-1].file_id, caption=f"Чек от @{message.from_user.username}", reply_markup=builder.as_markup())
-    await message.answer("Чек у админа! Жди подтверждения.")
+    builder.row(types.InlineKeyboardButton(text="✅ Одобрить", callback_data=f"ok_{message.from_user.id}"))
+    builder.row(types.InlineKeyboardButton(text="❌ Отклонить", callback_data=f"no_{message.from_user.id}"))
+    
+    await bot.send_photo(ADMIN_ID, message.photo[-1].file_id, 
+                         caption=f"💰 Новый чек от @{message.from_user.username}", 
+                         reply_markup=builder.as_markup())
+    await message.answer("📥 Чек отправлен админу. Ожидай подтверждения!")
 
+# ОДОБРЕНИЕ АДМИНОМ
 @dp.callback_query(F.data.startswith("ok_"))
 async def ok(callback: types.CallbackQuery):
     uid = callback.data.split("_")[1]
     key = generate_vless(uid)
-    await bot.send_message(uid, f"Оплата принята! Твой ключ:\n\n`{key}`")
+    await bot.send_message(uid, f"✅ Оплата принята!\nТвой личный ключ:\n\n`{key}`", parse_mode="Markdown")
     await callback.message.edit_caption(caption="✅ Одобрено")
     await callback.answer()
 
