@@ -8,7 +8,7 @@ from aiogram.filters import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # --- КОНФИГУРАЦИЯ ---
-# Вставь сюда ссылку от Supabase или Neon
+# postgresql://neondb_owner:npg_wnfBSe2Pa1Ys@ep-orange-term-am7inlo4-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
 DATABASE_URL = 'ТВОЯ_ССЫЛКА_POSTGRESQL' 
 API_TOKEN = '8752127884:AAEimy5lp4dhKURaioEK-TjQsGTnGzH9CQQ'
 ADMIN_ID = 8314455447
