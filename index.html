@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MukhaVPN MVP</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            font-family: 'Inter', -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        /* Декор в стиле авы */
+        .brush-top { position: absolute; top: -20px; left: -20px; width: 150px; opacity: 0.8; z-index: 1; }
+        .brush-bottom { position: absolute; bottom: -20px; right: -20px; width: 180px; opacity: 0.8; z-index: 1; }
+        
+        .container { position: relative; z-index: 2; text-align: center; width: 85%; }
+        
+        .logo-m { font-size: 120px; font-weight: 900; margin: 0; line-height: 1; }
+        .brand-name { font-size: 24px; font-weight: bold; letter-spacing: 2px; margin-top: -10px; color: #333; }
+        
+        .status-card {
+            background: #f8f8f8;
+            border: 3px solid #000;
+            padding: 25px;
+            border-radius: 20px;
+            margin: 30px 0;
+            box-shadow: 10px 10px 0px #000;
+        }
+        
+        .status-text { color: #ff00ff; font-weight: 900; font-size: 1.1em; text-transform: uppercase; }
+        .timer { font-size: 3em; font-weight: 900; margin: 15px 0; font-family: monospace; }
+        
+        .btn-action {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-action:active { transform: translateY(2px); box-shadow: none; }
+    </style>
+</head>
+<body>
+    <svg class="brush-top" viewBox="0 0 100 100"><path d="M0,0 Q50,20 100,0 L100,40 Q50,60 0,40 Z" fill="#ffcc00"/></svg>
+    <svg class="brush-bottom" viewBox="0 0 100 100"><path d="M0,60 Q50,40 100,60 L100,100 Q50,80 0,100 Z" fill="#aa00ff"/></svg>
+
+    <div class="container">
+        <h1 class="logo-m">M</h1>
+        <div class="brand-name">MUKHAVPN</div>
+        
+        <div class="status-card">
+            <div class="status-text">🚀 СТАТУС: АКТИВЕН</div>
+            <div class="timer" id="countdown">23:59:59</div>
+            <p style="margin: 0; font-size: 14px; opacity: 0.6;">Протокол: VLESS REALITY</p>
+        </div>
+        
+        <button class="btn-action" onclick="copyKey()">КОПИРОВАТЬ КЛЮЧ 🔐</button>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.headerColor = "#ffffff";
+
+        function copyKey() {
+            const key = "vless://your-key-here"; // Сюда потом прилетит ключ из базы
+            navigator.clipboard.writeText(key);
+            tg.HapticFeedback.notificationOccurred('success');
+            alert("Ключ скопирован!");
+        }
+
+        let time = 86400;
+        setInterval(() => {
+            time--;
+            let h = Math.floor(time / 3600);
+            let m = Math.floor((time % 3600) / 60);
+            let s = time % 60;
+            document.getElementById('countdown').innerText = 
+                `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }, 1000);
+    </script>
+</body>
+</html>
