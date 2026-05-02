@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MukhaVPN</title>
+    <title>Mukha VPN</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0a0b0c;
-            --card-bg: #161b1d;
-            --accent-color: #00f2ff; /* Бирюзовый как на примере */
+            --bg-color: #050a0a;
+            --card-bg: #111111;
+            --accent-cyan: #00f2ff;
             --text-main: #ffffff;
-            --text-secondary: #82868a;
+            --text-gray: #666666;
+            --accent-gold: #c5a059;
         }
 
         body {
-            background: radial-gradient(circle at top right, #004d4d 0%, var(--bg-color) 60%);
+            background: radial-gradient(circle at center top, #003333 0%, var(--bg-color) 70%);
             color: var(--text-main);
             font-family: 'Montserrat', sans-serif;
             margin: 0;
@@ -25,126 +26,129 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* Логотип */
-        .header { margin: 20px 0 40px; text-align: center; }
-        .logo-m { font-size: 80px; font-weight: 900; line-height: 1; margin: 0; }
-        .brand { font-size: 18px; letter-spacing: 3px; font-weight: 700; margin-top: -5px; }
+        /* Шапка */
+        .header { text-align: center; margin: 30px 0 40px; }
+        .m-logo { font-size: 80px; font-weight: 900; line-height: 1; margin: 0; }
+        .brand-name { font-size: 18px; letter-spacing: 4px; font-weight: 700; margin-top: 5px; }
 
-        /* Карточка профиля */
-        .user-card {
+        /* Карточка кабинета */
+        .profile-card {
             background: var(--card-bg);
             width: 100%;
-            border-radius: 28px;
+            max-width: 350px;
+            border-radius: 25px;
             padding: 25px;
             box-sizing: border-box;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 25px;
         }
 
-        .user-name { font-size: 24px; font-weight: 700; margin-bottom: 20px; }
+        .user-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; }
+        .data-grid { display: flex; justify-content: space-between; align-items: flex-end; }
         
-        .info-row { display: flex; justify-content: space-between; align-items: flex-end; }
-        .info-item .label { color: var(--text-secondary); font-size: 14px; margin-bottom: 5px; }
-        .info-item .value { font-size: 20px; font-weight: 700; }
-        .status-active { color: #ffcc00; font-size: 12px; text-transform: uppercase; margin-top: 4px; display: block; }
+        .data-item .label { color: var(--text-gray); font-size: 13px; margin-bottom: 5px; }
+        .data-item .value { font-size: 20px; font-weight: 900; }
+        .sub-status { color: var(--accent-gold); font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 5px; }
 
-        /* Кнопки действий */
-        .menu-list { width: 100%; display: flex; flex-direction: column; gap: 12px; }
-        
-        .menu-btn {
+        /* Кнопки */
+        .btn-stack { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 12px; }
+
+        .btn {
             background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 20px;
-            padding: 18px 20px;
+            padding: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            color: var(--text-main);
             text-decoration: none;
+            color: var(--text-main);
             transition: 0.2s;
         }
 
-        .menu-btn:active { background: rgba(255,255,255,0.1); transform: scale(0.98); }
-        .menu-btn.primary { background: var(--accent-color); color: #000; border: none; font-weight: 700; }
+        .btn:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
         
-        .btn-content { display: flex; align-items: center; gap: 15px; }
-        .icon { font-size: 20px; }
-        .arrow { opacity: 0.5; }
+        .btn.primary { background: var(--accent-cyan); color: #000; font-weight: 700; }
+
+        .btn-left { display: flex; align-items: center; gap: 15px; }
+        .btn-icon { font-size: 20px; }
+        .btn-arrow { opacity: 0.4; font-size: 14px; }
 
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="logo-m">M</div>
-        <div class="brand">MUKHAVPN</div>
+        <div class="m-logo">M</div>
+        <div class="brand-name">MUKHAVPN</div>
     </div>
 
-    <div class="user-card">
-        <div class="user-name" id="user_name">Пользователь</div>
-        <div class="info-row">
-            <div class="info-item">
+    <div class="profile-card">
+        <div class="user-title" id="display_name">~Мага</div>
+        <div class="data-grid">
+            <div class="data-item">
                 <div class="label">Баланс</div>
-                <div class="value">0₽</div>
+                <div class="value" id="user_balance">0₽</div>
             </div>
-            <div class="info-item" style="text-align: right;">
-                <div class="label">До 10 мая 2026</div>
-                <span class="status-active">подписка активна</span>
+            <div class="data-item" style="text-align: right;">
+                <div class="label" id="expiry_date">Дата не определена</div>
+                <div class="sub-status" id="sub_text">Проверка...</div>
             </div>
         </div>
     </div>
 
-    <div class="menu-list">
-        <a href="#" class="menu-btn primary" onclick="tgAction('buy')">
-            <div class="btn-content">
-                <span class="icon">💳</span>
+    <div class="btn-stack">
+        <a href="#" class="btn primary" onclick="handleAction('buy')">
+            <div class="btn-left">
+                <span class="btn-icon">💳</span>
                 <span>Купить подписку</span>
             </div>
-            <span class="arrow">❯</span>
-        </a>
-        
-        <a href="#" class="menu-btn" onclick="copyKey()">
-            <div class="btn-content">
-                <span class="icon">📥</span>
-                <span>Установка и настройка</span>
-            </div>
-            <span class="arrow">❯</span>
+            <span class="btn-arrow">❯</span>
         </a>
 
-        <a href="#" class="menu-btn" onclick="tgAction('support')">
-            <div class="btn-content">
-                <span class="icon">🎧</span>
+        <a href="#" class="btn" onclick="handleAction('setup')">
+            <div class="btn-left">
+                <span class="btn-icon">📩</span>
+                <span>Установка и настройка</span>
+            </div>
+            <span class="btn-arrow">❯</span>
+        </a>
+
+        <a href="#" class="btn" onclick="handleAction('support')">
+            <div class="btn-left">
+                <span class="btn-icon">🎧</span>
                 <span>Поддержка</span>
             </div>
-            <span class="arrow">❯</span>
+            <span class="btn-arrow">❯</span>
         </a>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = "#004d4d";
-        
-        // Берем имя из телеги
+
+        // 1. Устанавливаем актуальное имя
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('user_name').innerText = tg.initDataUnsafe.user.first_name;
+            document.getElementById('display_name').innerText = '~' + tg.initDataUnsafe.user.first_name;
         }
 
-        function copyKey() {
-            const dummyKey = "vless://your-id@your-ip:8443?security=reality...";
-            navigator.clipboard.writeText(dummyKey);
-            tg.HapticFeedback.notificationOccurred('success');
-            alert("Ключ скопирован в буфер обмена!");
-        }
+        // 2. Пример того, как ты можешь менять данные через JS
+        // В будущем эти данные можно получать из твоего бота (Python)
+        const userData = {
+            balance: "150₽",
+            expiry: "до 15 июня 2026",
+            isActive: true
+        };
 
-        function tgAction(type) {
-            tg.HapticFeedback.impactOccurred('light');
-            if(type === 'buy') tg.sendData("action_buy");
-            if(type === 'support') tg.close(); // Или любая другая логика
+        document.getElementById('user_balance').innerText = userData.balance;
+        document.getElementById('expiry_date').innerText = userData.expiry;
+        document.getElementById('sub_text').innerText = userData.isActive ? "ПОДПИСКА АКТИВНА" : "НЕ ОПЛАЧЕНО";
+
+        function handleAction(type) {
+            tg.HapticFeedback.impactOccurred('medium');
+            if(type === 'buy') tg.sendData("click_buy");
+            if(type === 'setup') alert("Инструкция отправлена в чат!");
         }
     </script>
 </body>
