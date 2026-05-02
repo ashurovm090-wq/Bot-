@@ -9,8 +9,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # --- КОНФИГУРАЦИЯ ---
 postgresql://neondb_owner:npg_wnfBSe2Pa1Ys@ep-orange-term-am7inlo4-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-DATABASE_URL = 'ТВОЯ_ССЫЛКА_POSTGRESQL' 
-API_TOKEN = '8752127884:AAEimy5lp4dhKURaioEK-TjQsGTnGzH9CQQ'
+DATABASE_URL = postgresql://neondb_owner:npg_wnfBSe2Pa1Ys@ep-orange-term-am7inlo4-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require 
+API_TOKEN = 8698270096:AAFr3TAqAe5nDMFjH3mS7SDiqTrzBK71tvQ
 ADMIN_ID = 8314455447
 CARD_NUMBER = "2202 2061 8149 6147"
 PRICE = "99"
