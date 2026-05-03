@@ -26,15 +26,13 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
-        /* Шапка */
-        .header { text-align: center; margin: 30px 0 40px; }
+        .header { text-align: center; margin: 20px 0 30px; }
         .m-logo { font-size: 80px; font-weight: 900; line-height: 1; margin: 0; }
-        .brand-name { font-size: 18px; letter-spacing: 4px; font-weight: 700; margin-top: 5px; }
+        .brand-name { font-size: 18px; letter-spacing: 4px; font-weight: 700; }
 
-        /* Карточка кабинета */
         .profile-card {
             background: var(--card-bg);
             width: 100%;
@@ -43,22 +41,20 @@
             padding: 25px;
             box-sizing: border-box;
             margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .user-title { font-size: 24px; font-weight: 700; margin-bottom: 25px; }
+        .user-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; }
         .data-grid { display: flex; justify-content: space-between; align-items: flex-end; }
-        
-        .data-item .label { color: var(--text-gray); font-size: 13px; margin-bottom: 5px; }
-        .data-item .value { font-size: 20px; font-weight: 900; }
-        .sub-status { color: var(--accent-gold); font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 5px; }
+        .data-item .label { color: var(--text-gray); font-size: 12px; margin-bottom: 4px; }
+        .data-item .value { font-size: 22px; font-weight: 900; }
+        .sub-status { color: var(--accent-gold); font-size: 11px; font-weight: 700; text-transform: uppercase; margin-top: 4px; }
 
-        /* Кнопки */
-        .btn-stack { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 12px; }
-
+        .btn-stack { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 10px; }
         .btn {
             background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 18px;
+            padding: 18px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -66,15 +62,11 @@
             color: var(--text-main);
             transition: 0.2s;
         }
-
-        .btn:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
-        
-        .btn.primary { background: var(--accent-cyan); color: #000; font-weight: 700; }
-
-        .btn-left { display: flex; align-items: center; gap: 15px; }
-        .btn-icon { font-size: 20px; }
-        .btn-arrow { opacity: 0.4; font-size: 14px; }
-
+        .btn:active { transform: scale(0.98); background: rgba(255,255,255,0.1); }
+        .btn.primary { background: var(--accent-cyan); color: #000; font-weight: 800; }
+        .btn-left { display: flex; align-items: center; gap: 12px; }
+        .btn-icon { font-size: 18px; }
+        .btn-arrow { opacity: 0.3; }
     </style>
 </head>
 <body>
@@ -92,8 +84,8 @@
                 <div class="value" id="user_balance">0₽</div>
             </div>
             <div class="data-item" style="text-align: right;">
-                <div class="label" id="expiry_date">Дата не определена</div>
-                <div class="sub-status" id="sub_text">Проверка...</div>
+                <div class="label" id="expiry_date">Загрузка...</div>
+                <div class="sub-status" id="sub_text">---</div>
             </div>
         </div>
     </div>
@@ -104,9 +96,8 @@
                 <span class="btn-icon">💳</span>
                 <span>Купить подписку</span>
             </div>
-            <span class="btn-arrow">❯</span>
+            <span>❯</span>
         </a>
-
         <a href="#" class="btn" onclick="handleAction('setup')">
             <div class="btn-left">
                 <span class="btn-icon">📩</span>
@@ -114,7 +105,6 @@
             </div>
             <span class="btn-arrow">❯</span>
         </a>
-
         <a href="#" class="btn" onclick="handleAction('support')">
             <div class="btn-left">
                 <span class="btn-icon">🎧</span>
@@ -128,27 +118,29 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        // 1. Устанавливаем актуальное имя
+        // Берем данные из URL (чтобы бот мог передать реальный баланс)
+        const urlParams = new URLSearchParams(window.location.search);
+        const balance = urlParams.get('balance') || "0";
+        const date = urlParams.get('date') || "не активна";
+
+        document.getElementById('user_balance').innerText = balance + "₽";
+        document.getElementById('expiry_date').innerText = "до " + date;
+        document.getElementById('sub_text').innerText = (date !== "не активна") ? "ПОДПИСКА АКТИВНА" : "НУЖНА ОПЛАТА";
+
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             document.getElementById('display_name').innerText = '~' + tg.initDataUnsafe.user.first_name;
         }
 
-        // 2. Пример того, как ты можешь менять данные через JS
-        // В будущем эти данные можно получать из твоего бота (Python)
-        const userData = {
-            balance: "150₽",
-            expiry: "до 15 июня 2026",
-            isActive: true
-        };
-
-        document.getElementById('user_balance').innerText = userData.balance;
-        document.getElementById('expiry_date').innerText = userData.expiry;
-        document.getElementById('sub_text').innerText = userData.isActive ? "ПОДПИСКА АКТИВНА" : "НЕ ОПЛАЧЕНО";
-
         function handleAction(type) {
             tg.HapticFeedback.impactOccurred('medium');
-            if(type === 'buy') tg.sendData("click_buy");
-            if(type === 'setup') alert("Инструкция отправлена в чат!");
+            if(type === 'buy') tg.sendData("action_buy");
+            if(type === 'setup') {
+                tg.sendData("action_setup");
+                tg.close();
+            }
+            if(type === 'support') {
+                tg.openTelegramLink("https://t.me/твой_ник"); // ЗАМЕНИ НА СВОЙ ЮЗЕРНЕЙМ
+            }
         }
     </script>
 </body>
